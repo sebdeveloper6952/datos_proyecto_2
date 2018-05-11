@@ -1,0 +1,15 @@
+﻿<Window x:Class="testNeo4j.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:testNeo4j"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525" Closing="Window_Closing">
+    <Grid>
+        <Button x:Name="btn_LoadPlatforms" Content="Load platforms file" HorizontalAlignment="Left" Margin="28,22,0,0" VerticalAlignment="Top" Width="114" Click="btn_LoadPlatforms_Click"/>
+        <Button x:Name="btn_LoadGames" Content="Load Games" HorizontalAlignment="Left" Margin="182,22,0,0" VerticalAlignment="Top" Width="92" Click="btn_LoadGames_Click"/>
+        <Button x:Name="btn_LoadGenres" Content="Load Genres file" HorizontalAlignment="Left" Margin="28,67,0,0" VerticalAlignment="Top" Width="114" Click="btn_LoadGenres_Click"/>
+        <Button x:Name="btn_LoadPublishers" Content="Load Publishers" HorizontalAlignment="Left" Margin="182,67,0,0" VerticalAlignment="Top" Width="92" Click="btn_LoadPublishers_Click"/>
+    </Grid>
+</Window>
