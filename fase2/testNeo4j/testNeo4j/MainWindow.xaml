@@ -11,5 +11,8 @@
         <Button x:Name="btn_LoadGames" Content="Load Games" HorizontalAlignment="Left" Margin="182,22,0,0" VerticalAlignment="Top" Width="92" Click="btn_LoadGames_Click"/>
         <Button x:Name="btn_LoadGenres" Content="Load Genres file" HorizontalAlignment="Left" Margin="28,67,0,0" VerticalAlignment="Top" Width="114" Click="btn_LoadGenres_Click"/>
         <Button x:Name="btn_LoadPublishers" Content="Load Publishers" HorizontalAlignment="Left" Margin="182,67,0,0" VerticalAlignment="Top" Width="92" Click="btn_LoadPublishers_Click"/>
+        <Button x:Name="btn_BuildRelationships" Content="Games->Genres" HorizontalAlignment="Left" Margin="28,159,0,0" VerticalAlignment="Top" Width="117" Click="btn_BuildRelationships_Click"/>
+        <Button x:Name="btn_ConnectGamesPlatforms" Content="Games->Platforms" HorizontalAlignment="Left" Margin="28,199,0,0" VerticalAlignment="Top" Width="117" Click="btn_ConnectGamesPlatforms_Click"/>
+        <Button x:Name="btn_ConnectGamesPublishers" Content="Games->Publishers" HorizontalAlignment="Left" Margin="28,238,0,0" VerticalAlignment="Top" Width="117" Click="btn_ConnectGamesPublishers_Click"/>
     </Grid>
 </Window>

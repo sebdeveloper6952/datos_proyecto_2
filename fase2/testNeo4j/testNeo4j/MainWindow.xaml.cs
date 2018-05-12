@@ -64,35 +64,32 @@ namespace testNeo4j
         {
             using (StreamReader sr = File.OpenText(GAMES_FILE))
             {
-                string line = sr.ReadLine();
                 Dictionary<string, string> map = new Dictionary<string, string>();
+                string line = sr.ReadLine();
+                string gameTitle = string.Empty;
+                int id = 0;
                 while(line != null)
                 {
-                    string[] lineParts = line.Split(':');
-                    map.Add(lineParts[0], lineParts[1]);
-                    line = sr.ReadLine();
-                    // write game to db
-                    if (line == GAME_DATA_DELIMITER)
+                    string[] parts = line.Split(':');
+                    if(parts.Length > 1)
                     {
-                        // advance to next line
-                        line = sr.ReadLine();
-                        // write game to db
-                        string id = string.Empty;
-                        string title = string.Empty;
-                        string platformId = string.Empty;
-                        string genres = string.Empty;
-                        string publisher = string.Empty;
-                        map.TryGetValue("id", out id);
-                        map.TryGetValue("GameTitle", out title);
-                        map.TryGetValue("PlatformId", out platformId);
-                        map.TryGetValue("Genres", out genres);
-                        map.TryGetValue("Publisher", out publisher);
-                        string[] gArr = null;
-                        if(genres != null) gArr = genres.Split(',');
-                        neo4jManager.instance.AddGame(int.Parse(id), title, int.Parse(platformId),
-                            gArr, publisher);
-                        map.Clear();
+                        if(parts[0].Equals("id"))
+                        {
+                            id = int.Parse(parts[1]);
+                        }
+                        else if(parts[0].Equals("GameTitle"))
+                        {
+                            gameTitle += parts[1];
+                            for (int i = 2; i < parts.Length; i++)
+                                gameTitle += parts[i];
+                            // write game to db
+                            neo4jManager.instance.AddGame(id, gameTitle);
+                            // reset game data variables
+                            gameTitle = string.Empty;
+                            id = 0;
+                        }
                     }
+                    line = sr.ReadLine();
                 }
             }
             MessageBox.Show("Finished writing games to db...");
@@ -133,10 +130,96 @@ namespace testNeo4j
             MessageBox.Show("Finished writing to db...");
         }
 
+        private void btn_BuildRelationships_Click(object sender, RoutedEventArgs e)
+        {
+            // iterate through games file
+            // foreach game, store genres in array
+            // pass to neo4jManager game id and genres array
+            using (StreamReader sr = File.OpenText(GAMES_FILE))
+            {
+                string line = sr.ReadLine();
+                int gameId = 0;
+                string[] genres = null;
+                while(line != null)
+                {
+                    string[] lineParts = line.Split(':');
+                    if(lineParts.Length > 1)
+                    {
+                        if(lineParts[0].Equals("id"))
+                        {
+                            gameId = int.Parse(lineParts[1]);
+                        }
+                        else if(lineParts[0].Equals("Genres"))
+                        {
+                            genres = lineParts[1].Split(',');
+                            foreach(string genre in genres)
+                                neo4jManager.instance.ConnectGameToGenre(gameId, genre);
+                        }
+                    }
+                    line = sr.ReadLine();
+                }
+            }
+            MessageBox.Show("Finished building relations...");
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // close connection to db
             neo4jManager.instance.Dispose();
+        }
+
+        private void btn_ConnectGamesPlatforms_Click(object sender, RoutedEventArgs e)
+        {
+            using (StreamReader sr = File.OpenText(GAMES_FILE))
+            {
+                string line = sr.ReadLine();
+                int gameId = 0;
+                int platformId = 0;
+                while (line != null)
+                {
+                    string[] parts = line.Split(':');
+                    if(parts.Length > 1)
+                    {
+                        if (parts[0].Equals("id"))
+                            gameId = int.Parse(parts[1]);
+                        else if(parts[0].Equals("PlatformId"))
+                        {
+                            platformId = int.Parse(parts[1]);
+                            neo4jManager.instance.ConnectGameToPlatform(gameId, platformId);
+                        }
+
+                    }
+                    line = sr.ReadLine();
+                }
+            }
+            MessageBox.Show("Finished building relations...");
+        }
+
+        private void btn_ConnectGamesPublishers_Click(object sender, RoutedEventArgs e)
+        {
+            using (StreamReader sr = File.OpenText(GAMES_FILE))
+            {
+                string line = sr.ReadLine();
+                int gameId = 0;
+                string pubName = string.Empty;
+                while (line != null)
+                {
+                    string[] parts = line.Split(':');
+                    if (parts.Length > 1)
+                    {
+                        if (parts[0].Equals("id"))
+                            gameId = int.Parse(parts[1]);
+                        else if (parts[0].Equals("Publisher"))
+                        {
+                            pubName = parts[1];
+                            neo4jManager.instance.ConnectGameToPublisher(gameId, pubName);
+                        }
+
+                    }
+                    line = sr.ReadLine();
+                }
+            }
+            MessageBox.Show("Finished building relations...");
         }
     }
 }

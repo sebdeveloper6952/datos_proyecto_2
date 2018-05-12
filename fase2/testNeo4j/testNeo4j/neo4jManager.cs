@@ -58,8 +58,7 @@ namespace testNeo4j
             }
         }
 
-        public void AddGame(int id, string title, int platformId, string[] genres,
-            string publisher)
+        public void AddGame(int id, string title)
         {
             using (var session = _driver.Session())
             {
@@ -79,6 +78,48 @@ namespace testNeo4j
                 {
                     var result = tx.Run("CREATE (p:Publisher {id: $id, name: $name})",
                         new { id, name });
+                });
+            }
+        }
+
+        public void ConnectGameToGenre(int gameId, string genreName)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (g:Game {id: $gameId})," +
+                                            "(gn:Genre {name: $genreName})" +
+                                            "CREATE (g)-[:hasGenre]->(gn)",
+                            new { gameId, genreName });
+                });
+            }
+        }
+
+        public void ConnectGameToPlatform(int gameId, int platformId)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (g:Game {id: $gameId})," +
+                                            "(p:Platform {id: $platformId})" +
+                                            "CREATE (g)-[:availableIn]->(p)",
+                            new { gameId, platformId });
+                });
+            }
+        }
+
+        public void ConnectGameToPublisher(int gameId, string publisher)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (g:Game {id: $gameId})," +
+                                            "(pub:Publisher {name: $publisher})" +
+                                            "CREATE (g)-[:publishedBy]->(pub)",
+                            new { gameId, publisher });
                 });
             }
         }
