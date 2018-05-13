@@ -239,10 +239,58 @@ namespace testNeo4j
                 for(int j = 0; j < 5; j++)
                 {
                     neo4jManager.instance.ConnectUserToGenre(string.Concat("Person", i), 
-                        r.Next(19) + 1, r.Next(10) + 1);
+                        r.Next(19) + 1);
                 }
             }
             MessageBox.Show("Connected users to genres...");
+        }
+
+        private void btn_ConnectUsersPlatforms_Click(object sender, RoutedEventArgs e)
+        {
+            // there are 109 platforms
+            // each user plays in 3 random platforms
+            Random r = new Random();
+            for(int i = 1; i <= 10; i++)
+            {
+                for(int j = 0; j < 3; j++)
+                {
+                    neo4jManager.instance.ConnectUserToPlatform(string.Concat("Person", i),
+                        r.Next(109)+1);
+                }
+            }
+            MessageBox.Show("Connected users to platforms...");
+        }
+
+        private void btn_ConnectUsersPublishers_Click(object sender, RoutedEventArgs e)
+        {
+            // there are 5487 publishers
+            // each user likes in 5 random publishers
+            Random r = new Random();
+            for (int i = 1; i <= 10; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    neo4jManager.instance.ConnectUserToPublisher(string.Concat("Person", i),
+                        r.Next(5487) + 1);
+                }
+            }
+            MessageBox.Show("Connected users to publishers...");
+        }
+
+        private void btn_ConnectUsersGames_Click(object sender, RoutedEventArgs e)
+        {
+            // there are 45576 games
+            // each user plays in 10 random games
+            Random r = new Random();
+            for (int i = 1; i <= 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    neo4jManager.instance.ConnectUserToGame(string.Concat("Person", i),
+                        r.Next(45576) + 1, r.Next(10)+1);
+                }
+            }
+            MessageBox.Show("Connected users to games...");
         }
     }
 }
