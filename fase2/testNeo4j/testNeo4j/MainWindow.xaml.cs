@@ -26,10 +26,12 @@ namespace testNeo4j
         protected const string GENRES_FILE = "genres_list.txt";
         protected const string PUBLISHERS_FILE = "publishers_list.txt";
         protected const string GAME_DATA_DELIMITER = "--game--data--finished--";
+        protected int nextUserId;
 
         public MainWindow()
         {
             InitializeComponent();
+            nextUserId = 1;
         }
 
         private void btn_LoadPlatforms_Click(object sender, RoutedEventArgs e)
@@ -220,6 +222,27 @@ namespace testNeo4j
                 }
             }
             MessageBox.Show("Finished building relations...");
+        }
+
+        private void btn_RandomUser_Click(object sender, RoutedEventArgs e)
+        {
+            neo4jManager.instance.AddRandomUser(string.Concat("Person", nextUserId++));
+            MessageBox.Show("Added user...");
+        }
+
+        private void btn_ConnectUsersGenres_Click(object sender, RoutedEventArgs e)
+        {
+            // for each user, make him like 5 random genres
+            Random r = new Random();
+            for(int i = 1; i < 10; i++)
+            {
+                for(int j = 0; j < 5; j++)
+                {
+                    neo4jManager.instance.ConnectUserToGenre(string.Concat("Person", i), 
+                        r.Next(19) + 1, r.Next(10) + 1);
+                }
+            }
+            MessageBox.Show("Connected users to genres...");
         }
     }
 }

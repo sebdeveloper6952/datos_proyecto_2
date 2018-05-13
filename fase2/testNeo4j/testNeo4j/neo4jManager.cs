@@ -124,6 +124,32 @@ namespace testNeo4j
             }
         }
 
+        public void ConnectUserToGenre(string username, int genreId, int rating)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (p:Person {username: $username})," +
+                                            "(g:Genre {id: $genreId})" +
+                                            "CREATE (p)-[:likes {rating: $rating}]->(g)",
+                            new { username, genreId, rating });
+                });
+            }
+        }
+
+        public void AddRandomUser(string username)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    tx.Run("CREATE (p:Person {username: $username})",
+                        new { username });
+                });
+            }
+        }
+
         public void Dispose()
         {
             _driver?.Dispose();

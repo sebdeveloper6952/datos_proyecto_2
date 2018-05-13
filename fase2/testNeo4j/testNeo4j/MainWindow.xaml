@@ -14,5 +14,7 @@
         <Button x:Name="btn_BuildRelationships" Content="Games->Genres" HorizontalAlignment="Left" Margin="28,159,0,0" VerticalAlignment="Top" Width="117" Click="btn_BuildRelationships_Click"/>
         <Button x:Name="btn_ConnectGamesPlatforms" Content="Games->Platforms" HorizontalAlignment="Left" Margin="28,199,0,0" VerticalAlignment="Top" Width="117" Click="btn_ConnectGamesPlatforms_Click"/>
         <Button x:Name="btn_ConnectGamesPublishers" Content="Games->Publishers" HorizontalAlignment="Left" Margin="28,238,0,0" VerticalAlignment="Top" Width="117" Click="btn_ConnectGamesPublishers_Click"/>
+        <Button x:Name="btn_RandomUser" Content="Create Random User" HorizontalAlignment="Left" Margin="182,159,0,0" VerticalAlignment="Top" Width="118" Click="btn_RandomUser_Click"/>
+        <Button x:Name="btn_ConnectUsersGenres" Content="Users->Genres" HorizontalAlignment="Left" Margin="182,199,0,0" VerticalAlignment="Top" Width="118" Click="btn_ConnectUsersGenres_Click"/>
     </Grid>
 </Window>
