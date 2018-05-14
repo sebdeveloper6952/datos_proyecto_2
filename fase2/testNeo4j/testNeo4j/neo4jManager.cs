@@ -124,7 +124,7 @@ namespace testNeo4j
             }
         }
 
-        public void ConnectUserToGenre(string username, int genreId, int rating)
+        public void ConnectUserToGenre(string username, int genreId)
         {
             using (var session = _driver.Session())
             {
@@ -132,8 +132,50 @@ namespace testNeo4j
                 {
                     var result = tx.Run("MATCH (p:Person {username: $username})," +
                                             "(g:Genre {id: $genreId})" +
+                                            "CREATE (p)-[:likes]->(g)",
+                            new { username, genreId});
+                });
+            }
+        }
+
+        public void ConnectUserToPlatform(string username, int platformId)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (p:Person {username: $username})," +
+                                            "(pl:Platform {id: $platformId})" +
+                                            "CREATE (p)-[:playsIn]->(pl)",
+                            new { username, platformId});
+                });
+            }
+        }
+
+        public void ConnectUserToPublisher(string username, int pubId)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (p:Person {username: $username})," +
+                                            "(pub:Publisher {id: $pubId})" +
+                                            "CREATE (p)-[:likes]->(pub)",
+                            new { username, pubId});
+                });
+            }
+        }
+
+        public void ConnectUserToGame(string username, int gameId, int rating)
+        {
+            using (var session = _driver.Session())
+            {
+                session.WriteTransaction(tx =>
+                {
+                    var result = tx.Run("MATCH (p:Person {username: $username})," +
+                                            "(g:Game {id: $gameId})" +
                                             "CREATE (p)-[:likes {rating: $rating}]->(g)",
-                            new { username, genreId, rating });
+                            new { username, gameId, rating });
                 });
             }
         }
