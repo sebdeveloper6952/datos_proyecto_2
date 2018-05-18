@@ -12,13 +12,18 @@ function getUserByName(username, res) {
     (person)-[:likes]->(game:Game), \
     (person)-[:likes]->(genre:Genre), \
     (person)-[:likes]->(pub:Publisher) \
-    return collect(distinct game.title), collect(distinct genre.name), \
-    collect(distinct pub.name)',
+    return collect(distinct game.title) as game, \
+    collect(distinct genre.name) as genre, \
+    collect(distinct pub.name) as publisher',
     {username: username} 
   )
   .then(result => {
     session.close();
-    res.send(JSON.stringify(result.records));
+    var profile = {};
+    profile['games'] = result.records[0]['_fields'][0];
+    profile['genres'] = result.records[0]['_fields'][1];
+    profile['publishers'] = result.records[0]['_fields'][2];
+    res.send(JSON.stringify(profile));
   })
   .catch(error => {
     session.close();
@@ -46,13 +51,20 @@ function getGameById(id, res) {
   var session = driver.session();
   session
   .run(
-    'match (game:Game {id: {id}}) \
-    return game.title',
+    'match (game:Game {id: {id}}), \
+     (game)-[:hasGenre]->(gn) \
+     return game.id, game.title as title, gn as genre',
     {id: parseInt(id)}
   )
   .then(result => {
     session.close();
-    res.send(JSON.stringify(result.records[0]));
+    if(result.records.length > 0) {
+      var game = {};
+      game['id'] = result.records[0]['_fields'][0]['low']
+      game['title'] = result.records[0]['_fields'][1];
+      game['genre'] = result.records[0]['_fields'][2]['properties']['name'];
+      res.send(JSON.stringify(game));
+    } else res.send('Game not found');
     })
   .catch(error => {
     session.close();
@@ -65,13 +77,20 @@ function getGameByTitle(gameTitle, res) {
     var session = driver.session();
     session
     .run(
-      'match (game:Game {title: {title}}) \
-      return game.id, game.title order by game.id',
+      'match (game:Game {title: {title}}), \
+       (game)-[:hasGenre]->(gn) \
+       return game.id, game.title as title, gn as genre',
       {title: gameTitle}
     )
     .then(result => {
       session.close();
-      res.send(JSON.stringify(result.records[0]));
+      if(result.records.length > 0) {
+        var game = {};
+        game['id'] = result.records[0]['_fields'][0]['low']
+        game['title'] = result.records[0]['_fields'][1];
+        game['genre'] = result.records[0]['_fields'][2]['properties']['name'];
+        res.send(JSON.stringify(game));
+      } else res.send('Game not found.');
       })
     .catch(error => {
       session.close();
