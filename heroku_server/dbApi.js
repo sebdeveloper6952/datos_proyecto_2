@@ -105,13 +105,16 @@ function recommendGamesByGenre(username, res) {
     .run(
       'match (person:Person {username: {username}}), \
       (person)-[:likes]->(gn:Genre)<-[:hasGenre]-(game:Game) \
-      return game.title',
+      return game.title as game',
       {username: username}
     )
     .then(result => {
       session.close();
       // choose 5 random games from result.records array
       var chosenGames = getRandomArrayElements(result.records, 5);
+      for(i = 0; i < chosenGames.length; i++) {
+        chosenGames[i] = chosenGames[i]['_fields'];
+      }
       res.send(JSON.stringify(chosenGames));
       })
     .catch(error => {
@@ -126,12 +129,15 @@ function recommendGamesByPublisher(username, res) {
     .run(
       'match (person:Person {username: {username}}), \
       (person)-[:likes]->(pub:Publisher)<-[:publishedBy]-(game:Game) \
-      return game.title',
+      return game.title as game',
       {username: username}
     )
     .then(result => {
       session.close();
       var chosenGames = getRandomArrayElements(result.records, 5);
+      for(i = 0; i < chosenGames.length; i++) {
+        chosenGames[i] = chosenGames[i]['_fields'];
+      }
       res.send(JSON.stringify(chosenGames));
     })
     .catch(error => {
@@ -154,6 +160,9 @@ function recommendGamesByGenreAndPublisher(username, res) {
     .then(result => {
       session.close();
         var chosenGames = getRandomArrayElements(result.records, 5);
+        for(i = 0; i < chosenGames.length; i++) {
+          chosenGames[i] = chosenGames[i]['_fields'];
+        }
         res.send(JSON.stringify(chosenGames));
       })
     .catch(error => {
@@ -175,6 +184,9 @@ function recommendGamesByFriendship(username, res) {
     .then(result => {
       session.close();
       var chosenGames = getRandomArrayElements(result.records, 5);
+      for(i = 0; i < chosenGames.length; i++) {
+        chosenGames[i] = chosenGames[i]['_fields'];
+      }
       res.send(JSON.stringify(chosenGames));
     })
     .catch(error => {
@@ -196,6 +208,9 @@ function recommendPersons(username, res) {
     .then(result => {
       session.close();
       var persons = getRandomArrayElements(result.records, 5);
+      for(i = 0; i < persons.length; i++) {
+        persons[i] = persons[i]['_fields'];
+      }
       res.send(JSON.stringify(persons));
       })
     .catch(error => {
