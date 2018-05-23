@@ -10,11 +10,9 @@ function getUserByName(username, res) {
   session.run(
     'match (person:Person {username: {username}}), \
     (person)-[:likes]->(game:Game), \
-    (person)-[:likes]->(genre:Genre), \
-    (person)-[:likes]->(pub:Publisher) \
+    (person)-[:likes]->(genre:Genre) \
     return collect(distinct game.title) as game, \
-    collect(distinct genre.name) as genre, \
-    collect(distinct pub.name) as publisher',
+    collect(distinct genre.name) as genre',
     {username: username} 
   )
   .then(result => {
@@ -22,7 +20,6 @@ function getUserByName(username, res) {
     var profile = {};
     profile['games'] = result.records[0]['_fields'][0];
     profile['genres'] = result.records[0]['_fields'][1];
-    profile['publishers'] = result.records[0]['_fields'][2];
     res.send(JSON.stringify(profile));
   })
   .catch(error => {
@@ -31,14 +28,19 @@ function getUserByName(username, res) {
   })
 }
 
-// POST /user/likesGame/:title
-function userLikesGame(title, rating, res) {
+// POST /users/likeGame
+function userLikesGame(username, title, res) {
   var session = driver.session();
   session.run(
+    'match (user:Person {username:{username}}), \
+    (game:Game {title:{title}}) \
+    create (user)-[:likes]->(game) return user.username',
+    {username:username, title:title}
   )
   .then(result => {
     session.close();
-    res.send('userLikesGame: ' + rating);
+    // response
+    res.status(201).send('Relationship created successfully.');
   })
   .catch(error => {
     session.close();
@@ -46,153 +48,91 @@ function userLikesGame(title, rating, res) {
   })
 }
 
-// GET /games/byId/:id
-function getGameById(id, res) {
+// POST /users/:username
+function createUser(username, res) {
   var session = driver.session();
   session
   .run(
-    'match (game:Game {id: {id}}), \
-     (game)-[:hasGenre]->(gn) \
-     return game.id, game.title as title, gn as genre',
-    {id: parseInt(id)}
+    'create (p:Person {username:{username}}) return p.username as username',
+    {username: username}
   )
   .then(result => {
     session.close();
-    if(result.records.length > 0) {
-      var game = {};
-      game['id'] = result.records[0]['_fields'][0]['low']
-      game['title'] = result.records[0]['_fields'][1];
-      game['genre'] = result.records[0]['_fields'][2]['properties']['name'];
-      res.send(JSON.stringify(game));
-    } else res.send('Game not found');
-    })
+    res.status(201).send('User created successfully.');
+  })
   .catch(error => {
     session.close();
     throw error;
   });
 }
 
-// GET /games/byTitle/:title
-function getGameByTitle(gameTitle, res) {
-    var session = driver.session();
-    session
-    .run(
-      'match (game:Game {title: {title}}), \
-       (game)-[:hasGenre]->(gn) \
-       return game.id, game.title as title, gn as genre',
-      {title: gameTitle}
-    )
-    .then(result => {
-      session.close();
-      if(result.records.length > 0) {
-        var game = {};
-        game['id'] = result.records[0]['_fields'][0]['low']
-        game['title'] = result.records[0]['_fields'][1];
-        game['genre'] = result.records[0]['_fields'][2]['properties']['name'];
-        res.send(JSON.stringify(game));
-      } else res.send('Game not found.');
-      })
-    .catch(error => {
-      session.close();
-      throw error;
-    });
+// POST /users/likeGenre
+function userLikesGenre(username, genre, res) {
+  var session = driver.session();
+  session.run(
+    'match (user:Person {username:{username}}), \
+    (genre:Genre {name:{genre}}) \
+    create (user)-[:likes]->(genre) return user.username',
+    {username:username, genre:genre}
+  )
+  .then(result => {
+    session.close();
+    // response
+    res.status(201).send('Relationship created successfully.');
+  })
+  .catch(error => {
+    session.close();
+    throw error;
+  })
 }
 
-// GET /users/recommend/byGenre/:username
-function recommendGamesByGenre(username, res) {
+function recommendUser(username, res) {
   var session = driver.session();
-    session
-    .run(
-      'match (person:Person {username: {username}}), \
-      (person)-[:likes]->(gn:Genre)<-[:hasGenre]-(game:Game) \
-      return game.title as game',
-      {username: username}
-    )
-    .then(result => {
-      session.close();
-      // choose 5 random games from result.records array
-      var chosenGames = getRandomArrayElements(result.records, 5);
-      for(i = 0; i < chosenGames.length; i++) {
-        chosenGames[i] = chosenGames[i]['_fields'];
-      }
-      res.send(JSON.stringify(chosenGames));
-      })
-    .catch(error => {
-      session.close();
-      throw error;
-    });
+  session.run(
+    'match (user:Person {username:{username}}), \
+      (user)-[:likes]->(g1:Game), \
+      (user)-[:likes]->(gn:Genre), \
+      (user)-[:likes]->(pub:Publisher), \
+      (pub)<-[:publishedBy]-(g2)-[:hasGenre]->(gn) \
+      return distinct g2.title as title', 
+      {username:username}
+  )
+  .then(result => {
+    session.close();
+    var chosenGames = getRandomArrayElements(result.records, 10);
+    for(i = 0; i < chosenGames.length; i++) {
+      chosenGames[i] = chosenGames[i]['_fields'];
+    }
+    res.send(JSON.stringify(chosenGames));
+  })
+  .catch(error => {
+    session.close();
+    throw error;
+  })
 }
 
-function recommendGamesByPublisher(username, res) {
+function recommendUserFlex(username, res) {
   var session = driver.session();
-    session
-    .run(
-      'match (person:Person {username: {username}}), \
-      (person)-[:likes]->(pub:Publisher)<-[:publishedBy]-(game:Game) \
-      return game.title as game',
-      {username: username}
-    )
-    .then(result => {
-      session.close();
-      var chosenGames = getRandomArrayElements(result.records, 5);
-      for(i = 0; i < chosenGames.length; i++) {
-        chosenGames[i] = chosenGames[i]['_fields'];
-      }
-      res.send(JSON.stringify(chosenGames));
-    })
-    .catch(error => {
-      session.close();
-      throw error;
-    });
-}
-
-function recommendGamesByGenreAndPublisher(username, res) {
-  var session = driver.session();
-    session
-    .run(
-      'match (person:Person {username: {username}}), \
-      (person)-[:likes]->(genre:Genre), \
-      (person)-[:likes]->(pub:Publisher), \
-      (pub)<-[:publishedBy]-(game:Game)-[:hasGenre]->(genre) \
-      return distinct game.title',
-      {username: username}
-    )
-    .then(result => {
-      session.close();
-        var chosenGames = getRandomArrayElements(result.records, 5);
-        for(i = 0; i < chosenGames.length; i++) {
-          chosenGames[i] = chosenGames[i]['_fields'];
-        }
-        res.send(JSON.stringify(chosenGames));
-      })
-    .catch(error => {
-      session.close();
-      throw error;
-    });
-}
-
-function recommendGamesByFriendship(username, res) {
-  var session = driver.session();
-    session
-    .run(
-      'match (person:Person {username: {username}}), \
-      (person)-[:friendsWith]->(friend:Person), \
-      (friend)-[r:likes]->(game:Game) where r.rating > 7 \
-      return game.title',
-      {title: gameTitle}
-    )
-    .then(result => {
-      session.close();
-      var chosenGames = getRandomArrayElements(result.records, 5);
-      for(i = 0; i < chosenGames.length; i++) {
-        chosenGames[i] = chosenGames[i]['_fields'];
-      }
-      res.send(JSON.stringify(chosenGames));
-    })
-    .catch(error => {
-      session.close();
-      throw error;
-    });
+  session.run(
+    'match (user:Person {username:{username}}), \
+      (user)-[:likes]->(g1:Game), \
+      (user)-[:likes]->(gn:Genre), \
+      (g2)-[:hasGenre]->(gn) \
+      return distinct g2.title as title', 
+      {username:username}
+  )
+  .then(result => {
+    session.close();
+    var chosenGames = getRandomArrayElements(result.records, 10);
+    for(i = 0; i < chosenGames.length; i++) {
+      chosenGames[i] = chosenGames[i]['_fields'];
+    }
+    res.send(JSON.stringify(chosenGames));
+  })
+  .catch(error => {
+    session.close();
+    throw error;
+  })
 }
 
 function recommendPersons(username, res) {
@@ -232,12 +172,10 @@ function getRandomArrayElements(array, count) {
 }
 
 // make methods available for require
-exports.getGameById = getGameById;
-exports.getGameByTitle = getGameByTitle;
+exports.createUser = createUser;
 exports.getUserByName = getUserByName;
-//exports.userLikesGame = userLikesGame;
-exports.recommendGamesByGenre = recommendGamesByGenre;
-exports.recommendGamesByPublisher = recommendGamesByPublisher;
-exports.recommendGamesByGenreAndPublisher = recommendGamesByGenreAndPublisher;
-exports.recommendGamesByFriendship = recommendGamesByFriendship;
+exports.userLikesGame = userLikesGame;
+exports.userLikesGenre = userLikesGenre;
+exports.recommendUser = recommendUser;
+exports.recommendUserFlex = recommendUserFlex;
 exports.recommendPersons = recommendPersons;

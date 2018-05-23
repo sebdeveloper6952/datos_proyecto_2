@@ -11,23 +11,23 @@ app.get('/users/:username', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     var user = db.getUserByName(req.params.username, res);
 });
-app.get('/games/byTitle/:title', function(req, res) {
-    var game = db.getGameByTitle(req.params.title, res);
+app.get('/recommendPersons', function(req, res) {
+    var persons = db.recommendPersons(req.query.username, res);
 });
-app.get('/games/byId/:id', function (req, res) {
-    var game = db.getGameById(req.params.id, res);
+app.post('/users', function(req, res) {
+    var response = db.createUser(req.query.username, res);
 });
-app.get('/users/recommend/byGenre/:username', function(req, res) {
-    var games = db.recommendGamesByGenre(req.params.username, res);
+app.post('/users/likeGame', function(req, res) {
+    db.userLikesGame(req.query.username, req.query.title, res);
 });
-app.get('/users/recommend/byPublisher/:username', function(req, res) {
-    var games = db.recommendGamesByPublisher(req.params.username, res);
+app.post('/users/likeGenre', function(req, res) {
+    db.userLikesGenre(req.query.username, req.query.genre, res);
 });
-app.get('/users/recommend/byGenreAndPublisher/:username', function(req, res) {
-    var games = db.recommendGamesByGenreAndPublisher(req.params.username, res);
+app.get('/recommend', function (req, res) {
+    db.recommendUser(req.query.username, res);
 });
-app.get('/users/recommend/persons/:username', function(req, res) {
-    var persons = db.recommendPersons(req.params.username, res);
+app.get('/recommendFlex', function(req, res){
+    db.recommendUserFlex(req.query.username, res);
 });
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
